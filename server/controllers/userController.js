@@ -1,8 +1,8 @@
 const User = require('../models/users')
-const jwt  = require('jsonwebtoken');
+const jwt  = require('jsonwebtoken')
+const {OAuth2Client} = require('google-auth-library')
 const { generatePassword, checkPassword } = require('../helpers')
 const axios = require('axios')
-
 
 module.exports = {
 
@@ -22,9 +22,8 @@ module.exports = {
         .then(function(saveUSer) {
             saveUSer.save()
             .then(function(data){
-
                 res.status(200).json({
-                    data
+                    message : 'Signup Success'
                 })
             })
             .catch(function(err){
@@ -34,7 +33,7 @@ module.exports = {
             })
         })
         .catch(function(err){
-            swal(`Registration Success`, '', "success")
+           console.log(err)
         })
     },
 
@@ -107,7 +106,11 @@ module.exports = {
 
                 let dataLogin = new User({
                     name: dataUser.data.name,
-                    email: dataUser.data.email
+                    gender : 'todoApp',
+                    address : 'todoApp',
+                    phoneNumber: dataUser.data.email,
+                    email: dataUser.data.email,
+                    password: 'todoApp'
                 })
     
                 dataLogin.save(function (err,user){
@@ -131,6 +134,81 @@ module.exports = {
         .catch(function(err){
             console.log(err)
         })
+    },
+
+    signinGoogle: function(req,res){
+
+        let token = req.headers.token
+        let CLIENT_ID = '1083675313112-0apmjvrb5cd1dm58i362esnekkfpeif4.apps.googleusercontent.com'
+        const client = new OAuth2Client(CLIENT_ID);
+        async function verify() {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const userid = payload['sub']
+        }
+
+        let dataUSer = null
+        axios({
+            method:'GET',
+            url: `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${token}'`
+        })
+        .then(function(response) {
+            dataUser = response
+            return User.find(
+                { email: response.data.email }
+            )
+        })
+        .then(function(data){
+            if(data.length > 0){
+                let id = data[0]._id
+                jwt.sign({
+                    userId : id,
+                    name : data[0].name,
+                    email : data[0].email
+                }, process.env.ACCESS_DATA, (err, newToken) => {
+                    res.status(200).json({
+                        userId : id,
+                        name : data[0].name,
+                        email : data[0].email,
+                        token : newToken
+                    })
+                })
+            } else {
+                let dataLogin = new User({
+                    name: dataUser.data.name,
+                    gender : 'todoApp',
+                    address : 'todoApp',
+                    phoneNumber: dataUser.data.email,
+                    email: dataUser.data.email,
+                    password: 'todoApp'
+                })
+    
+                dataLogin.save(function (err,user){
+                    let id = user._id
+                    if (!err) {
+                        jwt.sign({
+                            userId : id,
+                            name : user.name,
+                            email : user.email
+                        }, process.env.ACCESS_DATA, (err, newToken) => {
+                            res.status(200).json({
+                                token : newToken
+                            })
+                        })
+                    } else {
+                       
+                    }
+                })
+            }
+        })
+
+        .catch(function(err){
+            console.log(err)
+        })
+        verify().catch(console.error);
     },
 
     update: function(req,res){

@@ -5,18 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google-signin-client_id" content="1083675313112-0apmjvrb5cd1dm58i362esnekkfpeif4.apps.googleusercontent.com">
     <title>Document</title>
     <link rel="stylesheet" href="./style/css/register.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <!-- Sweet Alert -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://unpkg.com/sweetalert2@7.8.2/dist/sweetalert2.all.js"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
 
     <style>
-
         .msgErrors {
             font-size: 12px;
             color: red;
         }
-
     </style>
 </head>
 
@@ -30,17 +33,13 @@
         </div>
         <div class="form form--signup">
             <div class="form--heading">Welcome! Sign Up</div>
-            <div id="errorSignup">
-
-            </div>
-
             <div class="form-acsess">
-                <input type="text" placeholder="Name" id="name">
-                <input type="text" placeholder="Gender" id="gender">
-                <input type="text" placeholder="Phone" id="phone">
-                <input type="text" placeholder="Address" id="address">
-                <input type="email" placeholder="Email" id="email">
-                <input type="password" placeholder="Password" id="password">
+                <input type="text" placeholder="Name" id="name" onclick="clikName()">
+                <input type="text" placeholder="Gender" id="gender" onclick="clikGender()">
+                <input type="text" placeholder="Phone" id="phone" onclick="clikPhone()">
+                <input type="text" placeholder="Address" id="address" onclick="clikAddress()">
+                <input type="email" placeholder="Email" id="email" onclick="clikEmail()">
+                <input type="password" placeholder="Password" id="password" onclick="clikPassword()">
                 <button class="button" id="register">Sign Up</button>
             </div>
         </div>
@@ -53,10 +52,9 @@
                 <input type="email" placeholder="Email" id="emailLogin">
                 <input type="password" placeholder="Password" id="passwordLogin">
                 <button class="button" id="login">Login</button>
-    
-
-                    <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false" onlogin="checkLoginState()"></div>
-                </div>
+                <div class="g-signin2" data-onsuccess="onSignIn"></div>
+                <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false" onlogin="checkLoginState()"></div>
+            </div>
             </div>
         </div>
     </div>
@@ -92,20 +90,13 @@
                     data
                 })
                 .done(function (user) {
-
+                    swal(`${user.message}`, '', "success")
+                    .then(function(){
+                        location.reload()
+                    })
                 })
                 .fail(function (err) {
-                    if (err.responseJSON.error) {
-                        $(document).ready(function () {
-                            $("#error").text('')
-                            $("#error").append(
-                                `
-                        <p class='msgErrors'>${err.responseJSON.error}</p>
-
-                        `
-                            )
-                        })
-                    }
+                    checkError(err)
                 })
 
         })
@@ -163,7 +154,6 @@
             });
         }
 
-        // FB.login(statusChangeCallback, {scope: 'email,public_profile', return_scopes: true})
 
         window.fbAsyncInit = function () {
             FB.init({
@@ -174,16 +164,6 @@
             });
         };
 
-        // Load the SDK asynchronously
-        // (function (d, s, id) {
-        //     var js, fjs = d.getElementsByTagName(s)[0];
-        //     if (d.getElementById(id)) return;
-        //     js = d.createElement(s);
-        //     js.id = id;
-        //     js.src = "https://connect.facebook.net/en_US/sdk.js";
-        //     fjs.parentNode.insertBefore(js, fjs);
-        // }(document, 'script', 'facebook-jssdk'));
-
         (function(d, s, id) {
             var js, fjs = d.getElementsByTagName(s)[0];
             if (d.getElementById(id)) return;
@@ -191,6 +171,78 @@
             js.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.1&appId=2205347586421048&autoLogAppEvents=1';
             fjs.parentNode.insertBefore(js, fjs);
             }(document, 'script', 'facebook-jssdk'));
+        // END SIGN FACEBOOK
+
+        // START SIGN GOOGLE
+        function onSignIn(googleUser) {
+            let token = googleUser.getAuthResponse().id_token
+                $.ajax({
+                    method: "POST",
+                    url: "http://localhost:3000/users/signinGoogle",
+                    headers: {
+                        token: token
+                    }
+                })
+                .done(function(user){
+                    localStorage.setItem('userId', user.userId)
+                    localStorage.setItem('token', user.token)
+                    window.location.href = 'index.html'
+                })
+                .fail(function(err){})
+            
+        }
+        // END SIGN GOOGLE
+    
+        // START VALIDATION
+        function clikName(){
+            $("#name").val('').css('color', 'black')
+        }
+        function clikGender(){
+            $("#gender").val('').css('color', 'black')
+        }
+        function clikPhone(){
+            $("#phone").val('').css('color', 'black')
+        }
+        function clikAddress(){
+            $("#address").val('').css('color', 'black')
+        }
+        function clikEmail(){
+            $("#email").val('').css('color', 'black')
+        }
+        function clikPassword(){
+            $("#password").val('').css('color', 'black')
+        }
+
+        function checkError(err){
+            if(err){
+                if(err.responseJSON.error){
+                    if(err.responseJSON.error.name){
+                        $("#name").val(err.responseJSON.error.name.message).css('color', 'red', 'font-size', '6px')
+                    }
+                    if(err.responseJSON.error.gender){
+                        $("#gender").val(err.responseJSON.error.gender.message).css('color', 'red', 'font-size', '6px')
+                    }
+                    if(err.responseJSON.error.phoneNumber){
+                        $("#phone").val(err.responseJSON.error.phoneNumber.message).css('color', 'red', 'font-size', '6px')
+                    }
+                    if(err.responseJSON.error.address){
+                        $("#address").val(err.responseJSON.error.address.message).css('color', 'red', 'font-size', '6px')
+                    }
+                    if(err.responseJSON.error.email){
+                        $("#email").val(err.responseJSON.error.email.message).css('color', 'red', 'font-size', '6px')
+                    } else {
+                        $("#email").val('')
+                        $("#email").val('email already exist').css('color', 'red', 'font-size', '6px')
+                    }
+                    if(err.responseJSON.error.password){
+                        $("#password").val(err.responseJSON.error.password.message).css('color', 'red', 'font-size', '6px')
+                    }  
+                }
+
+                
+            }
+        }
+        // END VALIDATION
     </script>
 </body>
 
