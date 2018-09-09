@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./style/css/register.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+    <style>
+
+        .msgErrors {
+            font-size: 12px;
+            color: red;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="message signup">
+            <div class="btn-wrapper">
+                <button class="button" id="signupSwitch">SignUp</button>
+                <button class="button" id="loginSwitch"> Login</button>
+            </div>
+        </div>
+        <div class="form form--signup">
+            <div class="form--heading">Welcome! Sign Up</div>
+            <div id="errorSignup">
+
+            </div>
+
+            <div class="form-acsess">
+                <input type="text" placeholder="Name" id="name">
+                <input type="text" placeholder="Gender" id="gender">
+                <input type="text" placeholder="Phone" id="phone">
+                <input type="text" placeholder="Address" id="address">
+                <input type="email" placeholder="Email" id="email">
+                <input type="password" placeholder="Password" id="password">
+                <button class="button" id="register">Sign Up</button>
+            </div>
+        </div>
+        <div class="form form--login">
+            <div class="form--heading">Welcome back! </div>
+            <div id="errorLogin">
+
+            </div>
+            <div class="form-acsess">
+                <input type="email" placeholder="Email" id="emailLogin">
+                <input type="password" placeholder="Password" id="passwordLogin">
+                <button class="button" id="login">Login</button>
+    
+
+                    <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false" onlogin="checkLoginState()"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./style/js/register.js"></script>
+
+    <script>
+        let token = localStorage.getItem('token')
+        if (token) window.location = '/'
+
+        // USER REGISTER 
+        $("#register").click(function () {
+
+            let name = $('#name').val()
+            let gender = $('#gender').val()
+            let phone = $('#phone').val()
+            let address = $('#address').val()
+            let email = $('#email').val()
+            let password = $('#password').val()
+
+            let data = {
+                name,
+                gender,
+                phone,
+                address,
+                email,
+                password
+            }
+
+            $.ajax({
+                    method: "POST",
+                    url: "http://localhost:3000/users/signup",
+                    data
+                })
+                .done(function (user) {
+
+                })
+                .fail(function (err) {
+                    if (err.responseJSON.error) {
+                        $(document).ready(function () {
+                            $("#error").text('')
+                            $("#error").append(
+                                `
+                        <p class='msgErrors'>${err.responseJSON.error}</p>
+
+                        `
+                            )
+                        })
+                    }
+                })
+
+        })
+
+        // USER LOGIN
+        $("#login").click(function () {
+            let email = $('#emailLogin').val()
+            let password = $('#passwordLogin').val()
+
+            let data = {
+                email,
+                password
+            }
+            $.ajax({
+                    method: "POST",
+                    url: "http://localhost:3000/users/signin",
+                    data
+                })
+                .done(function (user) {
+                    // console.log(user)
+                    localStorage.setItem('userId', user.userId)
+                    localStorage.setItem('token', user.token)
+                    window.location.href = 'index.html'
+                })
+                .fail(function (err) {
+                    $(document).ready(function () {
+                        $("#errorLogin").text('')
+                        $("#errorLogin").append(
+                            `
+                        <p class='msgErrors'>${err.responseJSON.message}</p>
+                        `
+                        )
+                    })
+                })
+
+        })
+
+        // USER SIGNIN FACEBOOK
+        function checkLoginState() {
+            FB.getLoginStatus(function (response) {
+                let token = response.authResponse.accessToken
+                $.ajax({
+                    method: "POST",
+                    url: "http://localhost:3000/users/signinFb",
+                    data: {
+                        token: token
+                    }
+                })
+                .done(function(user){
+                    localStorage.setItem('userId', user.userId)
+                    localStorage.setItem('token', user.token)
+                    window.location.href = 'index.html'
+                })
+                .fail(function(err){})
+            });
+        }
+
+        // FB.login(statusChangeCallback, {scope: 'email,public_profile', return_scopes: true})
+
+        window.fbAsyncInit = function () {
+            FB.init({
+                appId: '2205347586421048',
+                cookie: true,
+                xfbml: true, 
+                version: 'v3.1' 
+            });
+        };
+
+        // Load the SDK asynchronously
+        // (function (d, s, id) {
+        //     var js, fjs = d.getElementsByTagName(s)[0];
+        //     if (d.getElementById(id)) return;
+        //     js = d.createElement(s);
+        //     js.id = id;
+        //     js.src = "https://connect.facebook.net/en_US/sdk.js";
+        //     fjs.parentNode.insertBefore(js, fjs);
+        // }(document, 'script', 'facebook-jssdk'));
+
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.1&appId=2205347586421048&autoLogAppEvents=1';
+            fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+    </script>
+</body>
+
+</html>

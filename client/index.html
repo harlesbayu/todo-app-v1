@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Todo List</title>
+
+    <!-- Jquery Ajax -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+        crossorigin="anonymous"></script>
+
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css?family=Baloo+Tammudu" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
+        crossorigin="anonymous">
+
+    <!-- Sweet Alert -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://unpkg.com/sweetalert2@7.8.2/dist/sweetalert2.all.js"></script>
+
+    <link rel="stylesheet" href="./style/css/custom.css">
+</head>
+
+<body>
+    <div class="myNavbar">
+        <div class="container">
+            <nav>
+                <i><span>My</span> TODO</i>
+                <button id="logout"><i class="fas fa-power-off">Logout</i></button>
+            </nav>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="container">
+        <div id="quotes">
+
+        </div>
+        <div class="row">
+            <div class="col-2">
+                <div class="list-group list-left">
+                    <a class="list-group-item list-group-item-action list-group-item-warning" id="btnAddTask">ADD TASK</a>
+                    <a class="list-group-item list-group-item-action list-group-item-warning" id="btnUncomplete">UNCOMPLETE</a>
+                    <a class="list-group-item list-group-item-action list-group-item-warning" id="btnComplete">COMPLETE</a>
+                </div>
+            </div>
+
+
+            <div class="col-8">
+                <div id="boxAddTask">
+                    <h3>ADD TASK</h3>
+                    <div class="form-group row">
+                        <label for="inputEmail3" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" placeholder="Name" id="nameTask">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="inputPassword3" class="col-sm-2 col-form-label">Description</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" placeholder="Description" id="descTask">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="inputPassword3" class="col-sm-2 col-form-label">Due Date</label>
+                        <div class="col-sm-10">
+                            <input type="datetime-local" class="form-control" id="deuDateTask">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-warning btn-block" id="createTask">Create Task</button>
+                </div>
+
+                <div class="row" id="boxUncompleted">
+
+                </div>
+
+                <div class="row" id="boxCompleted">
+
+                </div>
+            </div>
+
+
+            <div class="col-2 boxDate">
+                <div class="list-group list-left">
+                    <span class="list-group-item list-group-item-action list-group-item-warning" id="btnAddTask">LIST
+                        DATE</span>
+                    <ul class="list-group-item list-group-item-action list-group-item-warning">
+                        <li>12 Maret 2018</li>
+                        <li>12 Maret 2018</li>
+                        <li>12 Maret 2018</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Update Task-->
+        <div class="modal fade" id="updateTask" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content updateTask">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+        <script>
+
+            $('#myModal').on('shown.bs.modal', function () {
+                $('#myInput').trigger('focus')
+            })
+
+            $('.dropdown-toggle').dropdown()
+
+            let token = localStorage.getItem('token')
+            if (!token) window.location = 'regist.html'
+
+            // START ADD TASK
+            $("#btnAddTask").click(function () {
+                $("#boxAddTask").show()
+                $("#boxUncompleted").hide()
+                $("#boxCompleted").hide()
+            })
+
+            $("#createTask").click(function () {
+                let name = $("#nameTask").val()
+                let description = $("#descTask").val()
+                let dueDate = $("#deuDateTask").val()
+
+                let data = {
+                    name,
+                    description,
+                    dueDate,
+                }
+
+                $.ajax({
+                        method: "POST",
+                        url: "http://localhost:3000/todo/create",
+                        data,
+                        headers: {
+                            token: localStorage.getItem('token')
+                        }
+                    })
+                    .done(function (task) {
+                        swal(`Create Task ${task.task.name}`, ``, "success")
+                        .then(function(){
+                            $("#nameTask").val('')
+                            $("#descTask").val('')
+                            $("#deuDateTask").val('')
+                        })
+
+                    })
+                    .fail(function (err) {})
+
+            })
+            // END ADD TASK
+
+            // START UNCOMPLETE TASK
+            $("#btnUncomplete").click(function () {
+                $("#boxUncompleted").show()
+                $("#boxAddTask").hide()
+                $("#boxCompleted").hide()
+
+                $.ajax({
+                        method: "GET",
+                        url: "http://localhost:3000/todo/findTask",
+                        headers: {
+                            token: localStorage.getItem('token')
+                        }
+                    })
+                    .done(function (task) {
+                        let tasks = task.task.todoList
+                        $("#boxUncompleted").text('')
+                        for (let i = 0; i < tasks.length; i++) {
+                            if (tasks[i].status == false) {
+                                $(document).ready(function () {
+                                    $("#boxUncompleted").append(
+                                        `
+                                        <div class="col-4 removeOnUncomplete${tasks[i]._id}" id="boxCardStyle">
+                                            <div class="card boxCard" style="width: 14rem;">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">${tasks[i].name}</h5>
+                                                    <h6 class="card-subtitle mb-2 text-muted">${tasks[i].dueDate}</h6>
+                                                    <p class="card-text">${tasks[i].description}</p>
+                                                    <button onclick="updateTask('${tasks[i]._id}', '${tasks[i].name}','${tasks[i].description}','${tasks[i].dueDate}')" class="btn" data-toggle="modal" data-target="#updateTask""><i class="fas fa-marker"></i></button>
+                                                    <button onclick="removeTask('${tasks[i]._id}')" class="btn"><i class="fas fa-trash-alt"></i></button>
+                                                    <button onclick="completedTask('${tasks[i]._id}')" class="btn"><i class="fas fa-check-square"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `
+                                    )
+                                })
+
+                            }
+                        }
+                    })
+                    .fail(function (err) {
+
+                    })
+            })
+            // END UNCOMPLETE TASK
+
+            // START COMPLETE TASK
+            $("#btnComplete").click(function () {
+                $("#boxCompleted").show()
+                $("#boxAddTask").hide()
+                $("#boxUncompleted").hide()
+
+                $.ajax({
+                        method: "GET",
+                        url: "http://localhost:3000/todo/findTask",
+                        headers: {
+                            token: localStorage.getItem('token')
+                        }
+                    })
+                    .done(function (task) {
+                        let tasks = task.task.todoList
+                        $("#boxCompleted").text('')
+                        for (let i = 0; i < tasks.length; i++) {
+                            if (tasks[i].status == true) {
+                                $(document).ready(function () {
+                                    $("#boxCompleted").append(
+                                        `
+                                        <div class="col-4 removeOncomplete${tasks[i]._id}" id="boxCardStyle">
+                                            <div class="card boxCard" style="width: 14rem;">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">${tasks[i].name}</h5>
+                                                    <h6 class="card-subtitle mb-2 text-muted">${tasks[i].dueDate}</h6>
+                                                    <p class="card-text">${tasks[i].description}</p>
+                                                    <button onclick="updateTask('${tasks[i]._id}', '${tasks[i].name}','${tasks[i].description}','${tasks[i].dueDate}')" class="btn" data-toggle="modal" data-target="#updateTask""><i class="fas fa-marker"></i></button>
+                                                    <button onclick="removeTask('${tasks[i]._id}')" class="btn"><i class="fas fa-trash-alt"></i></button>
+                                                    <button onclick="UncompletedTask('${tasks[i]._id}')" class="btn"><i class="fas fa-times-circle"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `
+                                    )
+                                })
+
+                            }
+                        }
+                    })
+                    .fail(function (err) {
+
+                    })
+            })
+            // END COMPLETE TASK
+
+            // START COCOMPLETED TASK
+            function completedTask(id) {
+                $.ajax({
+                        method: "PUT",
+                        url: `http://localhost:3000/todo/complete/${id}`,
+                    })
+                    .done(function (task) {
+                        swal(`${task.message}`, '', "success")
+                        $(`.removeOnUncomplete${id}`).remove()
+                    })
+                    .fail(function (err) {
+
+                    })
+            }
+            // END UNCOMPLETED TASK
+
+            // START UNCOMPLETE TASK
+            function UncompletedTask(id) {
+                $.ajax({
+                        method: "PUT",
+                        url: `http://localhost:3000/todo/uncomplete/${id}`,
+                    })
+                    .done(function (task) {
+                        swal(`${task.message}`, '', "success")
+                        $(`.removeOncomplete${id}`).remove()
+                    })
+                    .fail(function (err) {
+
+                    })
+            }
+            // END UNCOMPLETE TASK
+
+            // START UPDATE TASK
+            function updateTask(id, nameTask, descriptionTask, dueDateTask){
+
+                $(".updateTask").text('')
+
+                $(".updateTask").append(
+                    `
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Update Activity</h5>
+                    </div>
+                    <div class="modal-body">
+                        Name
+                        <input class="form-control" type="text" placeholder="Task Name" id="nameUpdate" value="${nameTask}">
+                        Description
+                        <input class="form-control" type="text" placeholder="Description" id="descUpdate" value="${descriptionTask}">
+                        Date
+                        <input class="form-control" type="datetime-local" id="dueDateUpdate" value="${dueDateTask.slice(0,19)}">
+                    </div>
+                    <div class="modal-footer">
+                        <button id="closeUpdate" type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                        <button id="submitUpdate" type="button" class="btn btn-warning">Update</button>
+                    </div>
+                `
+                )
+
+                $("#submitUpdate").click(function () {
+
+                let data = {
+                    name: $("#nameUpdate").val(),
+                    description: $("#descUpdate").val(),
+                    dueDate: $("#dueDateUpdate").val()
+                }
+
+                $.ajax({
+                        method: "PUT",
+                        url: `http://localhost:3000/todo/update/${id}`,
+                        data
+                    })
+                    .done(function (task) {
+                        swal(`${task.message}`, '', "success")
+                        .then(function(){
+                            location.reload()
+                        })
+                    })
+                    .fail(function (err) {
+
+                    })
+                })
+            }
+            // END UPDATE TASK
+
+            // START REMOVE TASK
+            function removeTask(id) {
+                $.ajax({
+                        method: "DELETE",
+                        url: `http://localhost:3000/todo/delete/${id}`,
+                    })
+                    .done(function (task) {
+                        swal(`${task.message}`, '', "success")
+                        .then(function(){
+                            $(`.removeOnUncomplete${id}`).remove()
+                            $(`.removeOncomplete${id}`).remove()
+                        }) 
+                    })
+                    .fail(function (err) {})
+            }
+            // END START TASK
+
+            // Start LOGOUT
+            $("#logout").click(function(){
+                localStorage.removeItem('token')
+                location.reload()
+            })
+            // END LOGOUT
+        
+            $(document).ready(function(){
+                $.ajax({
+                    method: "GET",
+                    url: `http://localhost:3000/todo/quotes`,
+                })
+                .done(function (quote) {
+                    $("#quotes").append(
+                        `
+                        <h4>Quotes of the day : <h4>
+                        <p>${quote.quotes}</p>
+                        `
+                    )
+                })
+                .fail(function (err) {})
+            })
+        </script>
+</body>
+
+</html>

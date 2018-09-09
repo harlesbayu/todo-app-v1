@@ -1,0 +1,91 @@
+body {
+    font-family: 'Baloo Tammudu', cursive;
+}
+
+.clearfix {
+    clear: both;
+}
+
+.list-left {
+    color: black;
+    font-weight: bold;
+}
+
+#boxCardStyle {
+    margin-bottom: 10px;
+}
+
+.boxCard {
+    background-color: #FFE8A1;
+}
+
+#boxAddTask{
+    background-color: #FFE8A1;
+    padding: 10px;
+}
+
+#boxAddTask button {
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.myNavbar {
+    background-color: #FFE8A1;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.myNavbar .container nav span {
+    margin-left: 20px;
+    font-size: 20px;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+.boxDate ul {
+    list-style: none;
+}
+
+.boxDate ul li {
+    list-style: none;
+    cursor: pointer;
+    border: 1px black dotted;
+    padding: 2px;
+}
+
+.boxDate ul li:hover {
+    background-color: #FFE5E5;
+}
+
+.updateTask {
+    background-color:#FFE8A1;
+}
+
+.updateTask input {
+    margin-bottom: 15px;
+}
+
+#logout {
+    padding-top: 3px;
+    border-radius: 5px;
+    float: right;
+    cursor: pointer;
+}
+
+#quotes {
+    background-color: #FFE8A1;
+    margin-bottom: 20px;
+    color: black;
+    padding: 10px;
+    border-radius: 5px;
+    height: 80px;
+}
+
+#quotes h4 {
+    font-size: 16px;
+}
+
+#quotes p {
+    font-size: 16px;
+}
