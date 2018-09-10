@@ -26,6 +26,9 @@
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://unpkg.com/sweetalert2@7.8.2/dist/sweetalert2.all.js"></script>
 
+    <script type="text/javascript" 
+    src="https://mail.google.com/mail/u/0/?logout&hl=en"></script>
+
     <link rel="stylesheet" href="./style/css/custom.css">
 </head>
 
@@ -360,6 +363,7 @@
             // Start LOGOUT
             $("#logout").click(function(){
                 localStorage.removeItem('token')
+                window.location = "https://mail.google.com/mail/u/0/?logout&hl=en";
                 location.reload()
             })
             // END LOGOUT

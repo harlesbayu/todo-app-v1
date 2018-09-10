@@ -1,7 +1,7 @@
 const User = require('../models/users')
 const jwt  = require('jsonwebtoken')
 const {OAuth2Client} = require('google-auth-library')
-const { generatePassword, checkPassword } = require('../helpers')
+const { generatePassword, checkPassword, sendMailConf} = require('../helpers')
 const axios = require('axios')
 
 module.exports = {
@@ -22,6 +22,7 @@ module.exports = {
         .then(function(saveUSer) {
             saveUSer.save()
             .then(function(data){
+                sendMailConf(data.email)
                 res.status(200).json({
                     message : 'Signup Success'
                 })
@@ -46,8 +47,8 @@ module.exports = {
             return checkPassword(user.password, req.body.password, req.body.email)
         })
         .then(function(){
+            
             let userId = user._id
-
             jwt.sign({
                 userId : userId,
                 name : user.name,
@@ -88,6 +89,7 @@ module.exports = {
             )
         })
         .then(function(data){
+            
             if(data.length > 0){
                 let id = data[0]._id
                 jwt.sign({
@@ -103,19 +105,18 @@ module.exports = {
                     })
                 })
             } else {
-
                 let dataLogin = new User({
                     name: dataUser.data.name,
                     gender : 'todoApp',
-                    address : 'todoApp',
+                    address : 'todoApps',
                     phoneNumber: dataUser.data.email,
                     email: dataUser.data.email,
                     password: 'todoApp'
                 })
-    
-                dataLogin.save(function (err,user){
+                dataLogin.save()
+                .then(function(user){
+                    sendMailConf(user.email)
                     let id = user._id
-                    if (!err) {
                         jwt.sign({
                             userId : id,
                             name : user.name,
@@ -125,9 +126,9 @@ module.exports = {
                                 token : newToken
                             })
                         })
-                    } else {
-                       
-                    }
+                })
+                .catch(function(err){
+                    
                 })
             }
         })
@@ -180,13 +181,14 @@ module.exports = {
                 let dataLogin = new User({
                     name: dataUser.data.name,
                     gender : 'todoApp',
-                    address : 'todoApp',
+                    address : 'todoApps',
                     phoneNumber: dataUser.data.email,
                     email: dataUser.data.email,
                     password: 'todoApp'
                 })
     
                 dataLogin.save(function (err,user){
+                    sendMailConf(user.email)
                     let id = user._id
                     if (!err) {
                         jwt.sign({

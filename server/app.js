@@ -6,7 +6,8 @@ require('dotenv').config()
 const app = express()
 const port = 3000
 
-mongoose.connect('mongodb://localhost/todoapp', { useNewUrlParser: true });
+mongoose.connect(process.env.URL_MONGO_LOCAL, { useNewUrlParser: true });
+// mongoose.connect(URL_MONGO_MLAB , { useNewUrlParser: true });
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
