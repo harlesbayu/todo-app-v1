@@ -12,6 +12,7 @@ Jalankan mongod pada terminal, atau bisa menggunakan database MLAB, Keteranangan
 ##SERVER SIDE 
 
 ###TODO
+
 |           Route           |  HTTP  |                         Description                        |
 |---------------------------|--------|------------------------------------------------------------|
 | /todo/findTask            | GET    | Menampilkan aktifitas berdasarkan user                     |
@@ -24,6 +25,7 @@ Jalankan mongod pada terminal, atau bisa menggunakan database MLAB, Keteranangan
 
 
 ###USER
+
 |           Route           |  HTTP  |                         Description                        |
 |---------------------------|--------|------------------------------------------------------------|
 | /users/signup             | POST   | Registrari User                                            |
